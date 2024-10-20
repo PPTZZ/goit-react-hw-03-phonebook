@@ -8,9 +8,9 @@ export default class Contacts extends Component {
     if (e.target.nodeName === 'DIV' || e.target.nodeName === 'P') {
       return;
     }
-    const filteredContacts = this.props.contacts.filter(
-      contact => contact.id != e.currentTarget.id
-    );
+    const filteredContacts = this.props
+      .getContacts('contact')
+      .filter(contact => contact.id != e.currentTarget.id);
     this.props.onDelete(filteredContacts);
   };
   renderContacts = contactList => {
@@ -21,7 +21,7 @@ export default class Contacts extends Component {
           id={contact.id}
           onClick={this.handleDelete}
           sx={{
-            p:1,
+            p: 1,
             width: 'calc(100vw - 420px)',
             mb: 1,
             bgcolor: 'background.white',
@@ -38,12 +38,19 @@ export default class Contacts extends Component {
               height: '100%',
               justifyContent: 'space-between',
             }}>
-            <Grid2 container direction='column' justifyContent='space-between' height={1}>
+            <Grid2
+              container
+              direction='column'
+              justifyContent='space-between'
+              height={1}>
               <Typography>Name: {contact.name} </Typography>
               <Typography>Phone Number: {contact.number}</Typography>
             </Grid2>
             <Grid2>
-              <Chip label={<DeleteIcon />} sx={{'&:hover':{cursor:'pointer', bgcolor:'lightgray'}}}/>
+              <Chip
+                label={<DeleteIcon />}
+                sx={{ '&:hover': { cursor: 'pointer', bgcolor: 'lightgray' } }}
+              />
             </Grid2>
           </Grid2>
         </Box>
@@ -52,11 +59,14 @@ export default class Contacts extends Component {
   };
 
   render() {
-    return <Box sx={{p:'10px'}}>{this.renderContacts(this.props.contacts)}</Box>;
+    return (
+      <Box sx={{ p: '10px' }}>{this.renderContacts(this.props.contacts)}</Box>
+    );
   }
 }
 
 Contacts.propTypes = {
+  getContacts: PropTypes.func,
   contacts: PropTypes.array,
   onDelete: PropTypes.func,
 };

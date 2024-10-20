@@ -9,8 +9,7 @@ import {
 import ErrorIcon from '@mui/icons-material/Error';
 import PropTypes from 'prop-types';
 
-const AlertBox = ({ name, isOpen, onAlertToggle }) => {
-	console.log(isOpen);
+const AlertBox = ({ isOpen, onAlertToggle }) => {
 	return (
 		<Dialog open={isOpen}>
 			<DialogTitle
@@ -26,7 +25,7 @@ const AlertBox = ({ name, isOpen, onAlertToggle }) => {
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					{name} is already in contact list. Please try something else.
+					This name is already in contact list. Please try something else.
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
@@ -38,7 +37,6 @@ const AlertBox = ({ name, isOpen, onAlertToggle }) => {
 	);
 };
 AlertBox.propTypes = {
-	name: PropTypes.string.isRequired,
 	isOpen: PropTypes.bool,
 	onAlertToggle: PropTypes.func.isRequired,
 };

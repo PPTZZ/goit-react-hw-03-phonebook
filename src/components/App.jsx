@@ -7,104 +7,120 @@ import { Stack } from '@mui/material';
 import AlertBox from './AlertBox';
 
 export default class App extends Component {
-	state = {
-		contacts: [
-			{ id: 0, name: 'Rosie Simpson', number: '459-12-56' },
-			{ id: 1, name: 'Hermione Kline', number: '443-89-12' },
-			{ id: 2, name: 'Eden Clements', number: '645-17-79' },
-			{ id: 3, name: 'Annie Copeland', number: '227-91-26' },
-		],
-		filter: '',
-		isOpen: false,
-	};
+  state = {
+    contacts: [
+      { id: 0, name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 1, name: 'Hermione Kline', number: '443-89-12' },
+      { id: 2, name: 'Eden Clements', number: '645-17-79' },
+      { id: 3, name: 'Annie Copeland', number: '227-91-26' },
+    ],
+    filter: '',
+    isOpen: false,
+  };
 
-	setContacts = (key, value) => {
-		try {
-			const contacts = JSON.stringify(value);
-			localStorage.setItem(key, contacts);
-		} catch (err) {
-			console.log(err);
-		}
-	};
+  setContacts = (key, value) => {
+    try {
+      const contacts = JSON.stringify(value);
+      localStorage.setItem(key, contacts);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-	getContacts = (key) => {
-		try {
-			const data = localStorage.getItem(key);
-			return data === null ? undefined : JSON.parse(data);
-		} catch (error) {
-			console.log(error);
-		}
-	};
+  getContacts = key => {
+    try {
+      const data = localStorage.getItem(key);
+      return data === null ? undefined : JSON.parse(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-	newContacts = ({name, number}, id) => ({
-		id: id,
-		name: name,
-		number: number,
-	});
+  newContacts = ({ name, number }, id) => ({
+    id: id,
+    name: name,
+    number: number,
+  });
 
-	saveContacts = (value, id) => {
-		const contactObj = this.newContacts(value, id);
-		const currentState = this.getContacts('contact');
-		if (currentState === undefined) {
-			this.setContacts('contact', [contactObj]);
-		} else {
-			const contactObj = this.newContacts(value, id);
-			currentState.push(contactObj);
-			this.setContacts('contact', currentState);
-		}
-	};
+  initialSet = () => {
+    const currentState = this.getContacts('contact');
+    if (currentState === undefined) {
+      this.setContacts('contact', this.state.contacts);
+    }
+  };
 
-	handleAlert = () => {
-		this.setState((prevState) => ({ isOpen: !prevState.isOpen }));
-	};
+  saveContacts = (value, id) => {
+    const currentState = this.getContacts('contact');
+    const found = currentState
+      .map(contact => contact.name.toLocaleLowerCase())
+      .includes(value.name.toLocaleLowerCase());
+    if (found) {
+      return;
+    }
+    const contactObj = this.newContacts(value, id);
+    currentState.push(contactObj);
+    this.setContacts('contact', currentState);
+  };
 
-	handleSubmit = (data) => {
-		const id = nanoid(10);
-    this.saveContacts(data, id);
-		const found = this.state.contacts
-			.map((contact) => contact.name.toLocaleLowerCase())
-			.includes(data.name.toLocaleLowerCase());
-		{
-			found
-				? this.handleAlert()
-				: this.setState((prevState) => {
-						return {
-							contacts: [...prevState.contacts, contactToAdd],
-						};
-				  });
-		}
-	};
-	handleSearchChange = (e) => {
-		this.setState({ filter: e.target.value });
-	};
+  handleAlert = () => {
+    this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  };
 
-	handleDelete = (data) => {
-		this.setState({ contacts: data });
-	};
-	render() {
-		const fileteredContacts = this.state.contacts.filter((contact) => {
-			return contact.name
-				.toLocaleLowerCase()
-				.includes(this.state.filter.toLocaleLowerCase());
-		});
-		return (
-			<>
-				<Search onSearchChange={this.handleSearchChange} />
-				<Stack
-					direction='row'
-					width='100vw'
-					height='calc(100vh - 90px)'
-					backgroundColor='background.default'
-				>
-					<InputForm onFormSubmit={this.handleSubmit} />
-					<Contacts contacts={fileteredContacts} onDelete={this.handleDelete} />
-				</Stack>
-				<AlertBox
-					name={this.state.contacts[0].name}
-					isOpen={this.state.isOpen}
-					onAlertToggle={this.handleAlert}
-				/>
-			</>
-		);
-	}
+  handleSubmit = data => {
+    const id = nanoid(10);
+    const contactToAdd = {
+      id: id,
+      name: data.name,
+      number: data.number,
+    };
+    if (this.state.isOpen === false) {
+      this.saveContacts(data, id);
+    }
+    const found = this.state.contacts
+      .map(contact => contact.name.toLocaleLowerCase())
+      .includes(data.name.toLocaleLowerCase());
+    {
+      found
+        ? this.handleAlert()
+        : this.setState(prevState => {
+            return {
+              contacts: [...prevState.contacts, contactToAdd],
+            };
+          });
+    }
+  };
+  handleSearchChange = e => {
+    this.setState({ filter: e.target.value });
+  };
+
+  handleDelete = data => {
+	this.setContacts('contact', data);
+    this.setState({ contacts: data });
+  };
+
+  render() {
+    this.initialSet();
+    const fileteredContacts = this.getContacts('contact').filter(contact => {
+      return contact.name
+        .toLocaleLowerCase()
+        .includes(this.state.filter.toLocaleLowerCase());
+    });
+    return (
+      <>
+        <Search onSearchChange={this.handleSearchChange} />
+        <Stack
+          direction='row'
+          width='100vw'
+          height='calc(100vh - 90px)'
+          backgroundColor='background.default'>
+          <InputForm onFormSubmit={this.handleSubmit} />
+          <Contacts contacts={fileteredContacts} onDelete={this.handleDelete} getContacts={this.getContacts}/>
+        </Stack>
+        <AlertBox
+          isOpen={this.state.isOpen}
+          onAlertToggle={this.handleAlert}
+        />
+      </>
+    );
+  }
 }
