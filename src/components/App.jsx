@@ -7,6 +7,28 @@ import { Stack } from '@mui/material';
 import AlertBox from './AlertBox';
 
 export default class App extends Component {
+
+
+  componentDidMount(){
+    const data = localStorage.getItem('contacts');
+    try {
+      if (data){
+        this.setState({
+          contacts: JSON.parse(data)
+        })
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  componentDidUpdate( prevProps, prevState){
+    if(prevState?.contacts.length !== this.state.contacts.length){
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
+    }
+  }
+  
+  
   state = {
     contacts: [
       { id: 0, name: 'Rosie Simpson', number: '459-12-56' },
@@ -16,50 +38,6 @@ export default class App extends Component {
     ],
     filter: '',
     isOpen: false,
-  };
-
-  setContacts = (key, value) => {
-    try {
-      const contacts = JSON.stringify(value);
-      localStorage.setItem(key, contacts);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  getContacts = key => {
-    try {
-      const data = localStorage.getItem(key);
-      return data === null ? undefined : JSON.parse(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  newContacts = ({ name, number }, id) => ({
-    id: id,
-    name: name,
-    number: number,
-  });
-
-  initialSet = () => {
-    const currentState = this.getContacts('contact');
-    if (currentState === undefined) {
-      this.setContacts('contact', this.state.contacts);
-    }
-  };
-
-  saveContacts = (value, id) => {
-    const currentState = this.getContacts('contact');
-    const found = currentState
-      .map(contact => contact.name.toLocaleLowerCase())
-      .includes(value.name.toLocaleLowerCase());
-    if (found) {
-      return;
-    }
-    const contactObj = this.newContacts(value, id);
-    currentState.push(contactObj);
-    this.setContacts('contact', currentState);
   };
 
   handleAlert = () => {
@@ -73,9 +51,6 @@ export default class App extends Component {
       name: data.name,
       number: data.number,
     };
-    if (this.state.isOpen === false) {
-      this.saveContacts(data, id);
-    }
     const found = this.state.contacts
       .map(contact => contact.name.toLocaleLowerCase())
       .includes(data.name.toLocaleLowerCase());
@@ -94,13 +69,11 @@ export default class App extends Component {
   };
 
   handleDelete = data => {
-	this.setContacts('contact', data);
     this.setState({ contacts: data });
   };
 
   render() {
-    this.initialSet();
-    const fileteredContacts = this.getContacts('contact').filter(contact => {
+    const fileteredContacts = this.state.contacts.filter(contact => {
       return contact.name
         .toLocaleLowerCase()
         .includes(this.state.filter.toLocaleLowerCase());
@@ -114,7 +87,7 @@ export default class App extends Component {
           height='calc(100vh - 90px)'
           backgroundColor='background.default'>
           <InputForm onFormSubmit={this.handleSubmit} />
-          <Contacts contacts={fileteredContacts} onDelete={this.handleDelete} getContacts={this.getContacts}/>
+          <Contacts contacts={fileteredContacts} onDelete={this.handleDelete}/>
         </Stack>
         <AlertBox
           isOpen={this.state.isOpen}

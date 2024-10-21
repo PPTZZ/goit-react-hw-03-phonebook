@@ -8,8 +8,7 @@ export default class Contacts extends Component {
     if (e.target.nodeName === 'DIV' || e.target.nodeName === 'P') {
       return;
     }
-    const filteredContacts = this.props
-      .getContacts('contact')
+    const filteredContacts = this.props.contacts
       .filter(contact => contact.id != e.currentTarget.id);
     this.props.onDelete(filteredContacts);
   };
